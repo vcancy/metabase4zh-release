@@ -1,0 +1,18 @@
+${PROJECT_NAME}:
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.container.start_once: 'true'
+  tty: true
+  image: "${DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${CI_BUILD_REF_NAME}"
+  stdin_open: true
+  environment:
+    JAVA_TOOL_OPTIONS: -Xmx4g
+    JAVA_TIMEZONE: Asia/Shanghai
+    MB_DB_USER: root
+    MB_DB_PASS: 2dd7ce4c5a3144ea520f89b1ec61fa2b
+    MB_DB_PORT: 3306
+    MB_DB_TYPE: mysql
+    MB_DB_DBNAME: metabase
+    MB_DB_HOST: mysql
+  external_links:
+    - external-service/mysql-statistics:mysql

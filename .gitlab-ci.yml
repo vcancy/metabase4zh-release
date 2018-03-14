@@ -1,0 +1,70 @@
+image: ${DOCKER_REGISTRY}/env/jdk8-maven339:latest
+variables:
+  PROJECT_GROUP: ${CI_PROJECT_NAMESPACE}
+  PROJECT_NAME: ${CI_PROJECT_NAME}
+  #MAVEN运行时参数, -U:强制检查所有snapshots更新; -B: batch-mode,批处理模式
+  MAVEN_CLI_OPTS: "-U -B -Dspring.profiles.active=ci -Dconfig.server.enabled=false"
+  VERSION: ${CI_BUILD_TAG}
+  BUILD_DIR: /build/${PROJECT_GROUP}/${PROJECT_NAME}/${CI_PIPELINE_ID}
+  RANCHER_URL_TEST_ENV: http://rancher.source3g.com:80/v1/projects/1a11
+  ACCESS_KEY_TEST_ENV: 89949EBDC9B604F866D7
+  SECRET_KEY_TEST_ENV: YUmH1UgAkwUbRi2ZNBiFvknHyQj5ZUbNA5tzF1Tk
+  RANCHER_URL_PROD_ENV: http://rancher.source3g.com/v1
+  ACCESS_KEY_PROD_ENV: 	60FFB218FEA5FB4E8945
+  SECRET_KEY_PROD_ENV: Xh3JfgiWtPPwMJNg6MreG2bx7bmKKa5KeLw6At7m
+cache:
+  key: ${CI_BUILD_REF}
+  untracked: true
+#定义CI阶段
+stages:
+  - package
+  - deploy
+#compile,package,install,deploy
+
+package:
+  image: ${DOCKER_REGISTRY}/env/dind:latest
+  stage: package
+  script:
+    - cp *.jar docker/${PROJECT_NAME}.jar
+    - cp -r plugins docker/plugins
+    - cd docker
+    - sed -i 's#${DOCKER_REGISTRY}#'$DOCKER_REGISTRY'#g' Dockerfile
+    - sed -i 's#${PROJECT_NAME}#'$PROJECT_NAME'#g' Dockerfile
+    - DOCKER_REPO=${DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${CI_BUILD_REF_NAME}
+    # build docker image
+    - docker build -t ${DOCKER_REPO} .
+    # push至docker registry
+    - docker push ${DOCKER_REPO}
+  only:
+    - master
+    - tags
+
+deploy:test_env:
+  image: ${DOCKER_REGISTRY}/env/rancher-compose:latest
+  stage: deploy
+  script:
+    - cd docker
+    - sed -i 's#${PROJECT_NAME}#'$PROJECT_NAME'#g' docker-compose.yml
+    - rancher-compose --debug --url ${RANCHER_URL_TEST_ENV} --access-key ${ACCESS_KEY_TEST_ENV} --secret-key ${SECRET_KEY_TEST_ENV} -p ${PROJECT_GROUP} up -d --force-upgrade --confirm-upgrade
+  only:
+    - master
+    - tags
+  environment:
+    name: test
+  dependencies:
+    - package
+
+deploy:prod_env:
+  image: ${DOCKER_REGISTRY}/env/rancher-compose:latest
+  stage: deploy
+  script:
+    - cd docker
+    - sed -i 's#${PROJECT_NAME}#'$PROJECT_NAME'#g' docker-compose.yml
+    - rancher-compose --debug --url ${RANCHER_URL_PROD_ENV} --access-key ${ACCESS_KEY_PROD_ENV} --secret-key ${SECRET_KEY_PROD_ENV} -p ${PROJECT_GROUP} up --pull -d --force-upgrade --confirm-upgrade
+  only:
+    - tags
+  when: manual
+  environment:
+    name: prod
+  dependencies:
+    - package
