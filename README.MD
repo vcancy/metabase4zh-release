@@ -4,7 +4,7 @@ Metabase是一个开源的BI系统，能实现多数据库支持，简单易用�
 metabase4jar是metabase的编译版本，在metabase4jar基础上一定程度的二次开发，实现部分中文国际化的功能。
 
 
-![capture](http://gitlab.source3g.com:10080/platform/metabase4jar/raw/master/metabse4jar.png)
+![capture](https://github.com/vcancy/metabase4zh-release/blob/master/metabse4jar.png)
 
 ### JVM Jar
 ```sh
