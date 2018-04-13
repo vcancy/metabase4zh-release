@@ -6,12 +6,12 @@ variables:
   MAVEN_CLI_OPTS: "-U -B -Dspring.profiles.active=ci -Dconfig.server.enabled=false"
   VERSION: ${CI_BUILD_TAG}
   BUILD_DIR: /build/${PROJECT_GROUP}/${PROJECT_NAME}/${CI_PIPELINE_ID}
-  RANCHER_URL_TEST_ENV: http://rancher.source3g.com:80/v1/projects/1a11
-  ACCESS_KEY_TEST_ENV: 89949EBDC9B604F866D7
-  SECRET_KEY_TEST_ENV: YUmH1UgAkwUbRi2ZNBiFvknHyQj5ZUbNA5tzF1Tk
-  RANCHER_URL_PROD_ENV: http://rancher.source3g.com/v1
-  ACCESS_KEY_PROD_ENV: 	60FFB218FEA5FB4E8945
-  SECRET_KEY_PROD_ENV: Xh3JfgiWtPPwMJNg6MreG2bx7bmKKa5KeLw6At7m
+  RANCHER_URL_TEST_ENV: 
+  ACCESS_KEY_TEST_ENV: 
+  SECRET_KEY_TEST_ENV: 
+  RANCHER_URL_PROD_ENV: 
+  ACCESS_KEY_PROD_ENV: 	
+  SECRET_KEY_PROD_ENV: 
 cache:
   key: ${CI_BUILD_REF}
   untracked: true
